@@ -3,15 +3,14 @@ using Microsoft.EntityFrameworkCore;
 
 namespace APIW.Movies.DAL
 {
-    public class ApplicationDBContext : DbContext
+    public class ApplicationDbContext : DbContext
     {
-        public ApplicationDBContext(DbContextOptions<ApplicationDBContext> options) : base(options)
+        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
         {
-         
         }
 
-        // seccion para crear el dbset de las entidades o modelos   
+        //Todos los DBSets - las nuevas tablas
+
         public DbSet<Category> Categories { get; set; }
-        }
+    }
 }
-    

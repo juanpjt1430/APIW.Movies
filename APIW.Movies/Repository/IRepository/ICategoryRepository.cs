@@ -11,7 +11,5 @@ namespace APIW.Movies.Repository.IRepository
         Task<bool> CreateCategoryAsync(Category category); //Me crea una categoría
         Task<bool> UpdateCategoryAsync(Category category); //Me actualiza una categoría
         Task<bool> DeleteCategoryAsync(int id); //Me elimina una categoría
-
-
     }
 }
