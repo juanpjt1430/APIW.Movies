@@ -70,7 +70,7 @@ namespace APIW.Movies.Repository
 
         public async Task<bool> UpdateCategoryAsync(Category category)
         {
-            category.UpdatedDate = DateTime.UtcNow;
+            category.ModifiedDate = DateTime.UtcNow;
 
             _context.Categories.Update(category);
             return await SaveAsync();

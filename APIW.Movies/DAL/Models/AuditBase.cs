@@ -9,6 +9,6 @@ namespace APIW.Movies.DAL.Models
 
         public virtual DateTime CreatedDate { get; set; } //Me indica la fecha de creación de cada registro en BD
 
-        public virtual DateTime? UpdatedDate { get; set; } //Me indica la fecha de actualización de cada registro en BD
+        public virtual DateTime? ModifiedDate { get; set; } //Me indica la fecha de actualización de cada registro en BD
     }
 }
