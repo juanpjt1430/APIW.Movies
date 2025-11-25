@@ -51,11 +51,6 @@ namespace APIW.Movies.Services
             return categoryDto;
         }
 
-        public async Task<bool> DeleteCategoryAsync(int id)
-        {
-            throw new NotImplementedException();
-        }
-
         public async Task<CategoryDto> GetCategoryAsync(int id)
         {
             var category = await _categoryRepository.GetCategoryAsync(id); //Llamo al método del repositorio
@@ -70,9 +65,57 @@ namespace APIW.Movies.Services
             return _mapper.Map<ICollection<CategoryDto>>(categories); //Mapeo la lista de categorías a una lista de categorías DTO
         }
 
-        public async Task<bool> UpdateCategoryAsync(Category category)
+        public async Task<CategoryDto> UpdateCategoryAsync(CategoryCreateDto dto, int id)
         {
-            throw new NotImplementedException();
+            //Verificar si la categoría existe
+            var existingCategory = await _categoryRepository.GetCategoryAsync(id);
+
+            if (existingCategory == null)
+            {
+                throw new KeyNotFoundException($"No se encontró la categoría con Id {id}");
+            }
+
+            //Verificar si el nuevo nombre ya está en uso por otra categoría
+            var categoryExistsByName = await _categoryRepository.CategoryExistsByNameAsync(dto.Name);
+
+            if (categoryExistsByName)
+            {
+                throw new InvalidOperationException($"Ya existe una categoría con el nombre '{dto.Name}'");
+            }
+
+            //Mappear los cambios del DTO al modelo/entidad
+            _mapper.Map(dto, existingCategory);
+
+            //Actualizar la categoría en la base de datos
+            var categoryUpdated = await _categoryRepository.UpdateCategoryAsync(existingCategory);
+
+            if (!categoryUpdated)
+            {
+                throw new InvalidOperationException("Ocurrió un error al actualizar la categoría");
+            }
+
+            return _mapper.Map<CategoryDto>(existingCategory);
+        }
+
+        public async Task<bool> DeleteCategoryAsync(int id)
+        {
+            //Verificar si la categoría existe
+            var existingCategory = await _categoryRepository.GetCategoryAsync(id);
+
+            if (existingCategory == null)
+            {
+                throw new InvalidOperationException($"No se encontró la categoría con Id {id}");
+            }
+
+            //Borrar la categoría en la base de datos
+            var categoryDeleted = await _categoryRepository.DeleteCategoryAsync(id);
+
+            if (!categoryDeleted)
+            {
+                throw new InvalidOperationException("Ocurrió un error al actualizar la categoría");
+            }
+
+            return categoryDeleted;
         }
     }
 }
