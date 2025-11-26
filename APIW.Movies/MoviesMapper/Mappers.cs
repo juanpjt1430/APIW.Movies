@@ -8,8 +8,13 @@ namespace APIW.Movies.MoviesMapper
     {
         public Mappers()
         {
+            // Category mappings
             CreateMap<Category, CategoryDto>().ReverseMap();
             CreateMap<Category, CategoryCreateDto>().ReverseMap();
+
+            // Movie mappings
+            CreateMap<Movie, MovieDto>().ReverseMap();
+            CreateMap<Movie, MovieCreateDto>().ReverseMap();
         }
     }
 }
