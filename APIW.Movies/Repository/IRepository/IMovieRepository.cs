@@ -9,7 +9,7 @@ namespace APIW.Movies.Repository.IRepository
         Task<Movie> CreateAsync(Movie movie);
         Task<Movie> UpdateAsync(Movie movie);
         Task<bool> DeleteAsync(int id);
-        Task<bool> ExistsByTitleAsync(string title);
+        Task<bool> ExistsByNameAsync(string name);
         Task<bool> ExistsByIdAsync(int id);
     }
 }

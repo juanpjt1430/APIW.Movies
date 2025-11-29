@@ -18,7 +18,7 @@ namespace APIW.Movies.Repository
         {
             return await _context.Movies
                 .AsNoTracking()
-                .OrderBy(m => m.Title)
+                .OrderBy(m => m.Name)
                 .ToListAsync();
         }
 
@@ -46,19 +46,16 @@ namespace APIW.Movies.Repository
         public async Task<bool> DeleteAsync(int id)
         {
             var movie = await _context.Movies.FindAsync(id);
-
-            if (movie == null)
-                return false;
+            if (movie == null) return false;
 
             _context.Movies.Remove(movie);
             await _context.SaveChangesAsync();
             return true;
         }
 
-        public async Task<bool> ExistsByTitleAsync(string title)
+        public async Task<bool> ExistsByNameAsync(string name)
         {
-            return await _context.Movies
-                .AnyAsync(m => m.Title.ToLower() == title.ToLower());
+            return await _context.Movies.AnyAsync(m => m.Name.ToLower() == name.ToLower());
         }
 
         public async Task<bool> ExistsByIdAsync(int id)

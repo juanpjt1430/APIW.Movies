@@ -14,7 +14,7 @@ namespace APIW.Movies.MoviesMapper
 
             // Movie mappings
             CreateMap<Movie, MovieDto>().ReverseMap();
-            CreateMap<Movie, MovieCreateDto>().ReverseMap();
+            CreateMap<MovieCreateDto, Movie>().ReverseMap();
         }
     }
 }
