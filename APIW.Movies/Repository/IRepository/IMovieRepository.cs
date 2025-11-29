@@ -4,12 +4,12 @@ namespace APIW.Movies.Repository.IRepository
 {
     public interface IMovieRepository
     {
-        Task<IEnumerable<Movie>> GetAllAsync();
+        Task<ICollection<Movie>> GetAllAsync();
         Task<Movie?> GetByIdAsync(int id);
         Task<Movie> CreateAsync(Movie movie);
-        Task UpdateAsync(Movie movie);
-        Task DeleteAsync(Movie movie);
-        Task<bool> ExistsAsync(int id);
-        Task SaveChangesAsync();
+        Task<Movie> UpdateAsync(Movie movie);
+        Task<bool> DeleteAsync(int id);
+        Task<bool> ExistsByTitleAsync(string title);
+        Task<bool> ExistsByIdAsync(int id);
     }
 }

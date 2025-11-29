@@ -2,7 +2,6 @@
 using APIW.Movies.DAL.Models.Dtos;
 using APIW.Movies.Services.IServices;
 using AutoMapper;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace APIW.Movies.Controllers
@@ -11,60 +10,113 @@ namespace APIW.Movies.Controllers
     [ApiController]
     public class MoviesController : ControllerBase
     {
-        private readonly IMovieService _service;
+        private readonly IMovieService _movieService;
         private readonly IMapper _mapper;
 
-        public MoviesController(IMovieService service, IMapper mapper)
+        public MoviesController(IMovieService movieService, IMapper mapper)
         {
-            _service = service;
+            _movieService = movieService;
             _mapper = mapper;
         }
 
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<MovieDto>>> GetAll()
+        // GET ALL
+        [HttpGet(Name = "GetMoviesAsync")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<ActionResult<ICollection<MovieDto>>> GetMoviesAsync()
         {
-            var result = await _service.GetAllAsync();
-            return Ok(_mapper.Map<IEnumerable<MovieDto>>(result));
+            var movies = await _movieService.GetAllAsync();
+            return Ok(_mapper.Map<ICollection<MovieDto>>(movies));
         }
 
-        [HttpGet("{id:int}")]
-        public async Task<ActionResult<MovieDto>> GetById(int id)
+        // GET BY ID
+        [HttpGet("{id:int}", Name = "GetMovieAsync")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<MovieDto>> GetMovieAsync(int id)
         {
-            var movie = await _service.GetByIdAsync(id);
-            if (movie == null) return NotFound();
+            var movie = await _movieService.GetByIdAsync(id);
+            if (movie == null)
+                return NotFound(new { message = "La película no existe" });
 
             return Ok(_mapper.Map<MovieDto>(movie));
         }
 
-        [HttpPost]
-        public async Task<ActionResult<MovieDto>> Create(MovieCreateDto dto)
+        // CREATE
+        [HttpPost(Name = "CreateMovieAsync")]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<ActionResult<MovieDto>> CreateMovieAsync([FromBody] MovieCreateDto dto)
         {
-            var movie = _mapper.Map<Movie>(dto);
-            var created = await _service.CreateAsync(movie);
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
 
-            return CreatedAtAction(nameof(GetById), new { id = created.Id },
-                _mapper.Map<MovieDto>(created));
+            try
+            {
+                var created = await _movieService.CreateAsync(dto);
+
+                return CreatedAtRoute(
+                    "GetMovieAsync",
+                    new { id = created.Id },
+                    _mapper.Map<MovieDto>(created)
+                );
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Conflict(new { message = ex.Message });
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, new { message = "Error interno al crear la película" });
+            }
         }
 
-        [HttpPut("{id:int}")]
-        public async Task<IActionResult> Update(int id, MovieCreateDto dto)
+        // UPDATE
+        [HttpPut("{id:int}", Name = "UpdateMovieAsync")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<MovieDto>> UpdateMovieAsync(int id, [FromBody] MovieCreateDto dto)
         {
-            var movie = _mapper.Map<Movie>(dto);
-            var updated = await _service.UpdateAsync(id, movie);
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
 
-            if (updated == null) return NotFound();
+            try
+            {
+                var updated = await _movieService.UpdateAsync(id, dto);
 
-            return Ok(_mapper.Map<MovieDto>(updated));
+                if (updated == null)
+                    return NotFound(new { message = "La película no existe" });
+
+                return Ok(_mapper.Map<MovieDto>(updated));
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Conflict(new { message = ex.Message });
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, new { message = "Error interno al actualizar la película" });
+            }
         }
 
-        [HttpDelete("{id:int}")]
-        public async Task<IActionResult> Delete(int id)
+        // DELETE
+        [HttpDelete("{id:int}", Name = "DeleteMovieAsync")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> DeleteMovieAsync(int id)
         {
-            var ok = await _service.DeleteAsync(id);
-            if (!ok) return NotFound();
+            try
+            {
+                var deleted = await _movieService.DeleteAsync(id);
 
-            return NoContent();
+                if (!deleted)
+                    return NotFound(new { message = "La película no existe" });
+
+                return NoContent();
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, new { message = "Error interno al eliminar la película" });
+            }
         }
     }
 }
-

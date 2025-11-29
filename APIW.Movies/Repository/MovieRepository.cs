@@ -3,7 +3,6 @@ using APIW.Movies.DAL.Models;
 using APIW.Movies.Repository.IRepository;
 using Microsoft.EntityFrameworkCore;
 
-
 namespace APIW.Movies.Repository
 {
     public class MovieRepository : IMovieRepository
@@ -15,43 +14,56 @@ namespace APIW.Movies.Repository
             _context = context;
         }
 
-        public async Task<IEnumerable<Movie>> GetAllAsync()
+        public async Task<ICollection<Movie>> GetAllAsync()
         {
-            return await _context.Movies.ToListAsync();
+            return await _context.Movies
+                .AsNoTracking()
+                .OrderBy(m => m.Title)
+                .ToListAsync();
         }
 
         public async Task<Movie?> GetByIdAsync(int id)
         {
-            return await _context.Movies.FindAsync(id);
+            return await _context.Movies
+                .AsNoTracking()
+                .FirstOrDefaultAsync(m => m.Id == id);
         }
 
         public async Task<Movie> CreateAsync(Movie movie)
         {
             _context.Movies.Add(movie);
-            await SaveChangesAsync();
+            await _context.SaveChangesAsync();
             return movie;
         }
 
-        public async Task UpdateAsync(Movie movie)
+        public async Task<Movie> UpdateAsync(Movie movie)
         {
             _context.Movies.Update(movie);
-            await SaveChangesAsync();
-        }
-
-        public async Task DeleteAsync(Movie movie)
-        {
-            _context.Movies.Remove(movie);
-            await SaveChangesAsync();
-        }
-
-        public async Task<bool> ExistsAsync(int id)
-        {
-            return await _context.Movies.AnyAsync(c => c.Id == id);
-        }
-
-        public async Task SaveChangesAsync()
-        {
             await _context.SaveChangesAsync();
+            return movie;
+        }
+
+        public async Task<bool> DeleteAsync(int id)
+        {
+            var movie = await _context.Movies.FindAsync(id);
+
+            if (movie == null)
+                return false;
+
+            _context.Movies.Remove(movie);
+            await _context.SaveChangesAsync();
+            return true;
+        }
+
+        public async Task<bool> ExistsByTitleAsync(string title)
+        {
+            return await _context.Movies
+                .AnyAsync(m => m.Title.ToLower() == title.ToLower());
+        }
+
+        public async Task<bool> ExistsByIdAsync(int id)
+        {
+            return await _context.Movies.AnyAsync(m => m.Id == id);
         }
     }
 }

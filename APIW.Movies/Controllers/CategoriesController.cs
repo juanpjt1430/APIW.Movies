@@ -1,5 +1,7 @@
-﻿using APIW.Movies.DAL.Models.Dtos;
+﻿using APIW.Movies.DAL.Models;
+using APIW.Movies.DAL.Models.Dtos;
 using APIW.Movies.Services.IServices;
+using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.P.Movies.Controllers
@@ -89,14 +91,6 @@ namespace API.P.Movies.Controllers
             catch (InvalidOperationException ex) when (ex.Message.Contains("Ya existe"))
             {
                 return Conflict(new { message = ex.Message });
-            }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(new { message = ex.Message });
-            }
-            catch (InvalidOperationException ex) when (ex.Message.Contains("No existe") || ex.Message.Contains("no encontrado"))
-            {
-                return NotFound(new { message = ex.Message });
             }
             catch (Exception ex)
             {
